@@ -1,0 +1,44 @@
+name: CI with Cache
+
+on: [push]  # This means the action will run whenever you push changes to the repository.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # This means the job will run on the latest version of Ubuntu.
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3  # This checks out your repository so that GitHub Actions can use it.
+
+      - name: Cache dependencies
+        uses: actions/cache@v4  # This will cache the dependencies.
+        with:
+          path: |
+            ~/.npm  # Or whatever folder you want to cache (for example, node_modules or .m2 for Maven).
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}  # Create a unique cache key using the OS and a hash of the package-lock.json.
+          restore-keys: |
+            ${{ runner.os }}-node-modules-  # Fallback if the exact cache key isn’t found.
+
+      - name: Install dependencies
+        run: npm install  # This installs the dependencies if they aren't found in the cache.
+
+      - name: Prime Cache
+        run: echo "Cache hit/miss result: ${{ steps.cache.outputs.cache-hit }}"  # This step will print the result of whether the cache was a hit or miss.
+
+
+
+#         #3. Explanation of Steps
+
+# Checkout repository: This step pulls the latest version of your code.
+
+# Cache dependencies: This caches the dependencies (in this example, npm modules) to speed up future runs.
+
+# The path specifies where the dependencies are stored.
+
+# The key is used to create a unique cache. In this case, it combines the OS and a hash of your package-lock.json file. If the file changes, the cache will be considered invalid and rebuilt.
+
+# restore-keys is like a fallback in case the exact cache key isn’t found (e.g., if you change a dependency).
+
+# Install dependencies: This installs the dependencies, but only if they aren’t found in the cache.
+
+# Prime Cache: This step will output the result of whether the cache was a hit (i.e., found) or miss (i.e., not found).
